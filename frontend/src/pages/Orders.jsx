@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 const Orders = () => {
   const { backendUrl, currency } = useContext(ShopContext);
 
-  // Token localStorage se bhi read karega
   const [token] = useState(localStorage.getItem('token') || '');
   const [orderData, setOrderData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +17,7 @@ const Orders = () => {
       const response = await axios.post(
         `${backendUrl}/api/order/userorders`,
         {},
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       let allOrdersItem = [];
@@ -35,9 +34,25 @@ const Orders = () => {
         });
       });
 
+      // Filter unique products by _id to avoid duplicates
+      const uniqueItemsMap = new Map();
+      allOrdersItem.forEach((item) => {
+        if (!uniqueItemsMap.has(item._id)) {
+          uniqueItemsMap.set(item._id, item);
+        } else {
+          // Agar chaho to quantity add kar sakte ho:
+          // const existing = uniqueItemsMap.get(item._id);
+          // existing.quantity += item.quantity;
+          // uniqueItemsMap.set(item._id, existing);
+        }
+      });
+
+      const uniqueOrdersItem = Array.from(uniqueItemsMap.values());
+
       // Latest first
-      allOrdersItem.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setOrderData(allOrdersItem);
+      uniqueOrdersItem.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      setOrderData(uniqueOrdersItem);
     } catch (error) {
       console.error('❌ Failed to load orders:', error.message);
     } finally {
@@ -51,7 +66,7 @@ const Orders = () => {
     } else {
       loadOrderData();
     }
-  }, [token]);
+  }, [token, navigate]);
 
   return (
     <div className="pt-16 border-t">
