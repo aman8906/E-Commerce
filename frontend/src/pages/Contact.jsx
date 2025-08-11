@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Title from "../components/Title";
 import { assets } from "../assets/products";
-import NewsletterBox from "../components/NewsletterBox";
+import NewsletterBox from "../components/NewsLetterBox";
 
 const Contact = () => {
   const formRef = useRef();
