@@ -1,29 +1,20 @@
-/*import mongoose from "mongoose";
-
-const connectDB = async () => {
-  mongoose.connection.on("connected", () => {
-    console.log("MongoDB connected");
-  });
-
-  await mongoose.connect(process.env.MONGODB_URI);
-};
-
-export default connectDB;*/
-
 import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI is not defined in environment variables");
+    }
+
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverApi: {
-        version: '1',
-        strict: true,
-        deprecationErrors: true,
-      }
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverApi: { version: "1" }, // Works fine for Atlas
     });
+
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error("❌ MongoDB connection failed:", error.message);
+    console.error("❌ MongoDB connection failed:", error);
     process.exit(1);
   }
 };
