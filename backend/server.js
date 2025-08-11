@@ -16,18 +16,30 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-// ✅ Middleware
-app.use(express.json());
+// ✅ CORS setup for both local & production
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+];
 
-// ✅ CORS setup for frontend live & local
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:5173", // Vercel or local frontend
-    ],
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
+
+// ✅ Handle preflight requests explicitly
+app.options("*", cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+// ✅ Middleware
+app.use(express.json());
 
 // ✅ Serve static uploads folder
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
