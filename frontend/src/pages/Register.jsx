@@ -8,7 +8,8 @@ const Register = () => {
   const { setToken, setUser } = useContext(ShopContext);
   const navigate = useNavigate();
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL; // ✅ Auto picks env value
+  // Read backend URL from environment, fallback to localhost for dev
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -41,7 +42,7 @@ const Register = () => {
       const response = await axios.post(
         `${backendUrl}/api/user/register`,
         { name, email, password, phone, address },
-        { withCredentials: true } // ✅ For cookies if needed
+        { withCredentials: true } // for cookie support if needed
       );
 
       if (response.data.success) {
