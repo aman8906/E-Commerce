@@ -1,20 +1,20 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import Home from "./Pages/Home";
+import Home from "./pages/Home";
 import Collection from "./Pages/Collection";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Product from "./Pages/Product";
 import Cart from "./Pages/Cart";
-import Login from "./Pages/Login";
+import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PlaceOrder from "./pages/PlaceOrder";
-import Orders from "./Pages/Orders";
-import Navbar from "./components/Navbar";
+import Orders from "./pages/Orders";
+import Navbar from "./components/NavBar";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import Verify from "./Pages/Verify";
-import TrackOrder from "./Pages/TrackOrder";
+import TrackOrder from "./pages/TrackOrder";
 import Career from "./pages/Career";
 import Profile from "./pages/Profile";
 
