@@ -16,14 +16,22 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-// ✅ CORS setup for both local & production
+// ✅ Allowed Origins (local + production)
 const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:5173",
+  "http://localhost:5173",
+  process.env.FRONTEND_URL || "https://e-commerce-delta-gold.vercel.app"
 ];
 
+// ✅ CORS setup
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
