@@ -14,7 +14,7 @@ const ShopContextProvider = (props) => {
   const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || ""; // ✅ Safe default
 
   const currency = "$";
   const delivery_fee = 10;
@@ -34,35 +34,34 @@ const ShopContextProvider = (props) => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // ✅ Load products
+  // ✅ Load products from local file (or backend later if needed)
   useEffect(() => {
     setProducts(localProducts);
     console.log("✅ Products loaded:", localProducts);
   }, []);
 
-  // ✅ Load token + user from localStorage
+  // ✅ Load token + user from localStorage and fetch cart
   useEffect(() => {
-    if (!token) {
-      const localToken = localStorage.getItem("token");
-      const userData = localStorage.getItem("trendora_user");
+    const localToken = localStorage.getItem("token");
+    const userData = localStorage.getItem("trendora_user");
 
-      if (localToken) {
-        setToken(localToken);
-        if (userData) {
-          try {
-            setUser(JSON.parse(userData));
-          } catch {
-            setUser(null);
-            console.error("❌ Invalid user data in localStorage");
-          }
+    if (localToken) {
+      setToken(localToken);
+      if (userData) {
+        try {
+          setUser(JSON.parse(userData));
+        } catch {
+          setUser(null);
+          console.error("❌ Invalid user data in localStorage");
         }
-        getUserCart(localToken);
       }
+      getUserCart(localToken);
     }
-  }, [token]);
+  }, []);
 
   // ✅ Fetch cart from backend
   const getUserCart = async (token) => {
+    if (!backendUrl) return; // prevent errors if env missing
     try {
       const response = await fetch(`${backendUrl}/api/cart/get`, {
         method: "POST",
@@ -85,7 +84,7 @@ const ShopContextProvider = (props) => {
     cartCopy[itemId][size] = (cartCopy[itemId][size] || 0) + 1;
     setCartItems(cartCopy);
 
-    if (token) {
+    if (token && backendUrl) {
       try {
         await fetch(`${backendUrl}/api/cart/add`, {
           method: "POST",
@@ -104,10 +103,15 @@ const ShopContextProvider = (props) => {
     if (quantity === 0) toast.success("Item Removed From The Cart");
 
     const cartCopy = structuredClone(cartItems);
-    cartCopy[itemId][size] = quantity;
+    if (quantity === 0) {
+      delete cartCopy[itemId][size];
+      if (Object.keys(cartCopy[itemId]).length === 0) delete cartCopy[itemId];
+    } else {
+      cartCopy[itemId][size] = quantity;
+    }
     setCartItems(cartCopy);
 
-    if (token) {
+    if (token && backendUrl) {
       try {
         await fetch(`${backendUrl}/api/cart/update`, {
           method: "POST",
@@ -136,7 +140,7 @@ const ShopContextProvider = (props) => {
   const getCartAmount = () => {
     let amount = 0;
     for (const item in cartItems) {
-      const product = products.find((p) => p._id === item);
+      const product = products.find((p) => p._id === item || p.id === item); // ✅ supports both
       if (!product) continue;
       for (const size in cartItems[item]) {
         amount += product.price * cartItems[item][size];
@@ -145,7 +149,7 @@ const ShopContextProvider = (props) => {
     return amount;
   };
 
-  // ✅ Provide values via context
+  // ✅ Context values
   const value = {
     user,
     setUser,
