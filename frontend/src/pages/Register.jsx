@@ -2,11 +2,13 @@ import React, { useContext, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-hot-toast"; // ✅ Correct toast library
+import { toast } from "react-hot-toast";
 
 const Register = () => {
-  const { setToken, setUser, backendUrl } = useContext(ShopContext);
+  const { setToken, setUser } = useContext(ShopContext);
   const navigate = useNavigate();
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL; // ✅ Auto picks env value
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,13 +38,11 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${backendUrl}/api/user/register`, {
-        name,
-        email,
-        password,
-        phone,
-        address,
-      });
+      const response = await axios.post(
+        `${backendUrl}/api/user/register`,
+        { name, email, password, phone, address },
+        { withCredentials: true } // ✅ For cookies if needed
+      );
 
       if (response.data.success) {
         localStorage.setItem("token", response.data.token);
@@ -56,9 +56,7 @@ const Register = () => {
       }
     } catch (err) {
       console.error("Registration Error:", err);
-      const message =
-        err.response?.data?.message || "Server error. Please try again later.";
-      toast.error(message);
+      toast.error(err.response?.data?.message || "Server error. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -127,21 +125,15 @@ const Register = () => {
         {loading ? "Registering..." : "Register"}
       </button>
 
-     <p className="text-sm text-center mt-4 text-gray-600">
-  Already have an account?{" "}
-  <Link
-    to="/login"
-    className="relative font-semibold text-blue-600 group"
-  >
-    <span className="relative z-10 group-hover:text-blue-800 transition-colors duration-300">
-      Login
-    </span>
-    <span
-      className="absolute left-0 bottom-0 w-0 h-[2px] bg-blue-600 group-hover:w-full transition-all duration-300"
-    ></span>
-  </Link>
-</p>
-
+      <p className="text-sm text-center mt-4 text-gray-600">
+        Already have an account?{" "}
+        <Link to="/login" className="relative font-semibold text-blue-600 group">
+          <span className="relative z-10 group-hover:text-blue-800 transition-colors duration-300">
+            Login
+          </span>
+          <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-blue-600 group-hover:w-full transition-all duration-300"></span>
+        </Link>
+      </p>
     </form>
   );
 };
